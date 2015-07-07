@@ -15,11 +15,25 @@ class Cms::ContentController < Cms::BaseController
   def show
     @cms_page = @cms_site.pages.published.find_by_full_path!("/#{params[:cms_path]}")
 
-    if @cms_page.target_page.present?
-      redirect_to @cms_page.target_page.url
-    else
-      respond_with(@cms_page) do |format|
-        format.html { render_html }
+    if @cms_page and @cms_page.layout and @cms_page.layout.identifier == 'redirect-layout' # custom redirect
+      custom_redirect_code = @cms_page.blocks.find_by_identifier('custom_redirect_code').content.to_i
+      if @cms_page.target_page.present?
+        redirect_url = @cms_page.target_page.url
+      else
+        redirect_url = @cms_page.blocks.find_by_identifier('custom_redirect_url').content
+      end
+      if custom_redirect_code > 0
+        redirect_to redirect_url, status: custom_redirect_code
+      else
+        redirect_to redirect_url
+      end
+    else # generic redirect
+      if @cms_page.target_page.present?
+        redirect_to @cms_page.target_page.url
+      else
+        respond_with(@cms_page) do |format|
+          format.html { render_html }
+        end
       end
     end
   end
@@ -45,10 +59,18 @@ protected
   end
 
   def page_not_found
-    @cms_page = @cms_site.pages.published.find_by_full_path!('/404')
-
-    respond_with @cms_page do |format|
-      format.html { render_html(404) }
+    full_path = request.fullpath.split('?')[0]
+    block = Cms::Block.joins(:page => [:site]).where('cms_sites.id = ?', @cms_site.id).where(identifier: 'alternate_urls').where('cms_blocks.content LIKE (?)', "%#{full_path}%").first
+    if block.present?
+      @cms_page = block.page
+      respond_with @cms_page do |format|
+        format.html { render_html(200) }
+      end
+    else
+      @cms_page = @cms_site.pages.published.find_by_full_path!('/404')
+      respond_with @cms_page do |format|
+        format.html { render_html(404) }
+      end
     end
 
   rescue ActiveRecord::RecordNotFound

@@ -4,9 +4,12 @@ class Cms::Revision < ActiveRecord::Base
   serialize :data
   
   # -- Relationships --------------------------------------------------------
-  belongs_to :record, :polymorphic => true, :touch => true
+  belongs_to :record, :polymorphic => true
   
   # -- Scopes ---------------------------------------------------------------
   default_scope -> { order('created_at DESC') }
-  
+
+  after_save do
+    record.touch
+  end
 end

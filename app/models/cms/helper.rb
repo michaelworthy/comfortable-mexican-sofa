@@ -1,4 +1,4 @@
-class Cms::Helper < ActiveRecord::Base
+class Cms::Helper
 
   # returns cms snippet/page full object or json-parsed content if specified, caching results
   # @param [String] type 'snippet'/'page'

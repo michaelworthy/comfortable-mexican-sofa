@@ -1,15 +1,31 @@
 language: ruby
+before_install:
+  - gem install bundler
 before_script:
   - rake db:migrate
 script:
-  - rake test:all
+  - rake ci
 rvm:
-  - 1.9.3
   - 2.0.0
-  - 2.1.0
+  - 2.1.10
+  - 2.2.5
+  - 2.3.1
 gemfile:
-  - test/gemfiles/Gemfile.rails.4.0
   - test/gemfiles/Gemfile.rails.4.1
+  - test/gemfiles/Gemfile.rails.4.2
+  - test/gemfiles/Gemfile.rails.5.0
 branches:
   only:
     - master
+matrix:
+  fast_finish: true
+  include:
+    - rvm: 2.3.1
+      gemfile: test/gemfiles/Gemfile.rails.master
+  exclude:
+    - rvm: 2.0.0
+      gemfile: test/gemfiles/Gemfile.rails.5.0
+    - rvm: 2.1.10
+      gemfile: test/gemfiles/Gemfile.rails.5.0
+  allow_failures:
+    - gemfile: test/gemfiles/Gemfile.rails.master

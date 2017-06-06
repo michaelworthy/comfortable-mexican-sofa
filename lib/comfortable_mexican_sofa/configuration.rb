@@ -40,12 +40,6 @@ class ComfortableMexicanSofa::Configuration
   # force it to English by setting this to `:en`
   attr_accessor :admin_locale
 
-  # Database prefix.  If you want to keep your comfortable mexican sofa tables
-  # in a location other than the default databases add a database_config.
-  # Setting this to `cms` will look for a cms_#{Rails.env} database definition
-  # in your database.yml file
-  attr_accessor :database_config
-
   # A class that is included as a sweeper to admin base controller if it's set
   attr_accessor :admin_cache_sweeper
 
@@ -94,16 +88,19 @@ class ComfortableMexicanSofa::Configuration
       'es'    => 'Español',
       'pt-BR' => 'Português Brasileiro',
       'zh-CN' => '简体中文',
+      'zh-TW' => '正體中文',
       'ja'    => '日本語',
       'sv'    => 'Svenska',
       'ru'    => 'Русский',
       'pl'    => 'Polski',
       'de'    => 'Deutsch',
       'nl'    => 'Nederlands',
-      'it'    => 'Italiano'
+      'it'    => 'Italiano',
+      'da'    => 'Dansk',
+      'cs'    => 'Česky',
+      'nb' => 'Norsk'
     }
     @admin_locale         = nil
-    @database_config      = nil
     @admin_cache_sweeper  = nil
     @allow_irb            = false
     @allowed_helpers      = nil

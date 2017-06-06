@@ -1,6 +1,7 @@
 #= require jquery
 #= require jquery_ujs
-#= require jquery.ui.all
+#= require jquery-ui
+#= require tinymce-jquery
 #= require codemirror
 #= require codemirror/modes/css
 #= require codemirror/modes/htmlmixed
@@ -8,10 +9,9 @@
 #= require codemirror/modes/markdown
 #= require codemirror/modes/xml
 #= require codemirror/addons/edit/closetag
-#= require comfortable_mexican_sofa/lib/bootstrap
-#= require comfortable_mexican_sofa/lib/wysihtml5
-#= require comfortable_mexican_sofa/lib/bootstrap-wysihtml5
+#= require bootstrap
 #= require comfortable_mexican_sofa/lib/bootstrap-datetimepicker
+#= require comfortable_mexican_sofa/lib/diff
 
 $ ->
   CMS.init()
@@ -52,12 +52,13 @@ window.CMS.slugify = ->
 
 
 window.CMS.wysiwyg = ->
-  $('textarea[data-cms-rich-text]').each (i, element) ->
-    $(element).wysihtml5
-      html:         true
-      color:        false
-      stylesheets:  []
-
+  tinymce.init
+    selector:       'textarea[data-cms-rich-text]'
+    plugins:        ['link', 'image', 'code']
+    toolbar:        'undo redo | styleselect | bullist numlist | link unlink image | code'
+    menubar:        false
+    statusbar:      false
+    relative_urls:  false
 
 window.CMS.codemirror = ->
   $('textarea[data-cms-cm-mode]').each (i, element) ->
@@ -67,10 +68,15 @@ window.CMS.codemirror = ->
       autoCloseTags:  true
       lineNumbers:    true
     CMS.code_mirror_instances.push(cm)
-  
+    $(cm.display.wrapper).resizable resize: ->
+      cm.setSize($(@).width(), $(@).height())
+      cm.refresh()
+
   $('a[data-toggle="tab"]').on 'shown', ->
     for cm in CMS.code_mirror_instances
       cm.refresh()
+    return
+  return
 
 window.CMS.sortable_list = ->
   $('.sortable').sortable
@@ -95,7 +101,7 @@ window.CMS.page_blocks = ->
   $('select#page_layout_id').bind 'change.cms', ->
     $.ajax
       url: $(this).data('url'),
-      data: 
+      data:
         layout_id: $(this).val()
       complete: ->
         CMS.wysiwyg()

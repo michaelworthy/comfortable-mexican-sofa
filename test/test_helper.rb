@@ -1,10 +1,11 @@
 # encoding: utf-8
+ENV['RAILS_ENV'] = 'test'
 
 require 'coveralls'
-Coveralls.wear!('rails')
+Coveralls.wear! 'rails'
 
-ENV['RAILS_ENV'] = 'test'
 require_relative '../config/environment'
+
 require 'rails/test_help'
 require 'rails/generators'
 require 'mocha/setup'
@@ -18,6 +19,7 @@ class ActiveSupport::TestCase
   
   def setup
     reset_config
+    reset_locale
     stub_paperclip
   end
   
@@ -32,11 +34,8 @@ class ActiveSupport::TestCase
       config.fixtures_path        = File.expand_path('db/cms_fixtures', Rails.root)
       config.revisions_limit      = 25
       config.locales              = { 
-        'en'    => 'English',
-        'es'    => 'Español',
-        'pt-BR' => 'Português Brasileiro',
-        'zh-CN' => '简体中文',
-        'ja'    => '日本語'
+        'en' => 'English',
+        'es' => 'Español'
       }
       config.admin_locale         = nil
       config.upload_file_options  = { }
@@ -48,6 +47,11 @@ class ActiveSupport::TestCase
     end
     ComfortableMexicanSofa::HttpAuth.username = 'username'
     ComfortableMexicanSofa::HttpAuth.password = 'password'
+  end
+  
+  def reset_locale
+    I18n.default_locale = :en
+    I18n.locale         = :en
   end
   
   # Example usage:
@@ -90,8 +94,8 @@ class ActiveSupport::TestCase
   end
   
   def stub_paperclip
-    Cms::Block.any_instance.stubs(:save_attached_files).returns(true)
-    Cms::Block.any_instance.stubs(:delete_attached_files).returns(true)
+    Comfy::Cms::Block.any_instance.stubs(:save_attached_files).returns(true)
+    Comfy::Cms::Block.any_instance.stubs(:delete_attached_files).returns(true)
     Paperclip::Attachment.any_instance.stubs(:post_process).returns(true)
   end
   
@@ -108,6 +112,7 @@ class ActionDispatch::IntegrationTest
   def setup
     host! 'test.host'
     reset_config
+    reset_locale
     stub_paperclip
   end
   

@@ -18,9 +18,13 @@ module ComfortableMexicanSofa::Fixture::Snippet
         end
         
         # setting content
-        if File.exists?(content_path = File.join(path, 'content.html'))
-          if fresh_fixture?(snippet, content_path)
-            snippet.content = read_as_haml(content_path)
+        %w(html haml).each do |extension|
+          if File.exists?(content_path = File.join(path, "content.#{extension}"))
+            if fresh_fixture?(snippet, content_path)
+              snippet.content = extension == "html" ? 
+                ::File.open(content_path).read : 
+                Haml::Engine.new(::File.open(content_path).read).render.rstrip
+            end
           end
         end
         
@@ -28,7 +32,7 @@ module ComfortableMexicanSofa::Fixture::Snippet
         if snippet.changed? || self.force_import
           if snippet.save
             save_categorizations!(snippet, categories)
-            ComfortableMexicanSofa.logger.warn("[FIXTURES] Imported Snippet \t #{snippet.identifier}")
+            ComfortableMexicanSofa.logger.info("[FIXTURES] Imported Snippet \t #{snippet.identifier}")
           else
             ComfortableMexicanSofa.logger.warn("[FIXTURES] Failed to import Snippet \n#{snippet.errors.inspect}")
           end
@@ -64,7 +68,7 @@ module ComfortableMexicanSofa::Fixture::Snippet
           f.write(snippet.content)
         end
         
-        ComfortableMexicanSofa.logger.warn("[FIXTURES] Exported Snippet \t #{snippet.identifier}")
+        ComfortableMexicanSofa.logger.info("[FIXTURES] Exported Snippet \t #{snippet.identifier}")
       end
     end
   end

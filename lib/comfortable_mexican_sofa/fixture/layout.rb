@@ -19,11 +19,16 @@ module ComfortableMexicanSofa::Fixture::Layout
         end
         
         # setting content
-        if File.exists?(content_path = File.join(path, 'content.html'))
-          if fresh_fixture?(layout, content_path)
-            layout.content = read_as_haml(content_path)
+        %w(html haml).each do |extension|
+          if File.exists?(content_path = File.join(path, "content.#{extension}"))
+            if fresh_fixture?(layout, content_path)
+              layout.content = extension == "html" ? 
+                ::File.open(content_path).read : 
+                Haml::Engine.new(::File.open(content_path).read).render.rstrip
+            end
           end
         end
+        
         if File.exists?(content_path = File.join(path, 'stylesheet.css'))
           if fresh_fixture?(layout, content_path)
             layout.css = File.open(content_path).read
@@ -38,7 +43,7 @@ module ComfortableMexicanSofa::Fixture::Layout
         # saving
         if layout.changed? || self.force_import
           if layout.save
-            ComfortableMexicanSofa.logger.warn("[FIXTURES] Imported Layout \t #{layout.identifier}")
+            ComfortableMexicanSofa.logger.info("[FIXTURES] Imported Layout \t #{layout.identifier}")
           else
             ComfortableMexicanSofa.logger.warn("[FIXTURES] Failed to import Layout \n#{layout.errors.inspect}")
           end
@@ -83,7 +88,7 @@ module ComfortableMexicanSofa::Fixture::Layout
           f.write(layout.js)
         end
         
-        ComfortableMexicanSofa.logger.warn("[FIXTURES] Exported Layout \t #{layout.identifier}")
+        ComfortableMexicanSofa.logger.info("[FIXTURES] Exported Layout \t #{layout.identifier}")
       end
     end
   end
